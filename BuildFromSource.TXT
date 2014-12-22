@@ -1,0 +1,124 @@
+Building from Source
+The official CloudStack release is always in source code form. You will likely be able to find “convenience binaries,” the source is the canonical release. In this section, we’ll cover acquiring the source release and building that so that you can deploy it using Maven or create Debian packages or RPMs.
+
+Note that building and deploying directly from source is typically not the most efficient way to deploy an IaaS. However, we will cover that method as well as building RPMs or Debian packages for deploying CloudStack.
+
+The instructions here are likely version-specific. That is, the method for building from source for the 4.4.x series is different from the 4.2.x series.
+
+If you are working with a unreleased version of CloudStack, see the INSTALL.md file in the top-level directory of the release.
+
+Getting the release
+You can download the latest CloudStack release from the Apache CloudStack project download page.
+
+Prior releases are available via archive.apache.org as well. See the downloads page for more information on archived releases.
+
+You’ll notice several links under the ‘Latest release’ section. A link to a file ending in tar.bz2, as well as a PGP/GPG signature, MD5, and SHA512 file.
+
+The tar.bz2 file contains the Bzip2-compressed tarball with the source code.
+The .asc file is a detached cryptographic signature that can be used to help verify the authenticity of the release.
+The .md5 file is an MD5 hash of the release to aid in verify the validity of the release download.
+The .sha file is a SHA512 hash of the release to aid in verify the validity of the release download.
+Verifying the downloaded release
+There are a number of mechanisms to check the authenticity and validity of a downloaded release.
+
+Getting the KEYS
+To enable you to verify the GPG signature, you will need to download the KEYS file.
+
+You next need to import those keys, which you can do by running:
+
+# gpg --import KEYS
+GPG
+The CloudStack project provides a detached GPG signature of the release. To check the signature, run the following command:
+
+$ gpg --verify apache-cloudstack-4.4.1-src.tar.bz2.asc
+If the signature is valid you will see a line of output that contains ‘Good signature’.
+
+MD5
+In addition to the cryptographic signature, CloudStack has an MD5 checksum that you can use to verify the download matches the release. You can verify this hash by executing the following command:
+
+$ gpg --print-md MD5 apache-cloudstack-4.4.1-src.tar.bz2 | diff - apache-cloudstack-4.4.1-src.tar.bz2.md5
+If this successfully completes you should see no output. If there is any output from them, then there is a difference between the hash you generated locally and the hash that has been pulled from the server.
+
+SHA512
+In addition to the MD5 hash, the CloudStack project provides a SHA512 cryptographic hash to aid in assurance of the validity of the downloaded release. You can verify this hash by executing the following command:
+
+$ gpg --print-md SHA512 apache-cloudstack-4.4.1-src.tar.bz2 | diff - apache-cloudstack-4.4.1-src.tar.bz2.sha
+If this command successfully completes you should see no output. If there is any output from them, then there is a difference between the hash you generated locally and the hash that has been pulled from the server.
+
+Prerequisites for building Apache CloudStack
+There are a number of prerequisites needed to build CloudStack. This document assumes compilation on a Linux system that uses RPMs or DEBs for package management.
+
+You will need, at a minimum, the following to compile CloudStack:
+
+Maven (version 3)
+Java (Java 7/OpenJDK 1.7)
+Apache Web Services Common Utilities (ws-commons-util)
+MySQL
+MySQLdb (provides Python database API)
+Tomcat 6 (not 6.0.35)
+genisoimage
+rpmbuild or dpkg-dev
+Extracting source
+Extracting the CloudStack release is relatively simple and can be done with a single command as follows:
+
+$ tar -jxvf apache-cloudstack-4.4.1-src.tar.bz2
+You can now move into the directory:
+
+$ cd ./apache-cloudstack-4.4.1-src
+Building RPMs from Source
+As mentioned previously in “Prerequisites for building Apache CloudStack”, you will need to install several prerequisites before you can build packages for CloudStack. Here we’ll assume you’re working with a 64-bit build of CentOS or Red Hat Enterprise Linux.
+
+# yum groupinstall "Development Tools"
+# yum install java-1.7.0-openjdk-devel.x86_64 genisoimage mysql mysql-server ws-commons-util MySQL-python tomcat6 createrepo
+Next, you’ll need to install build-time dependencies for CloudStack with Maven. We’re using Maven 3, so you’ll want to grab a Maven 3 tarball and uncompress it in your home directory (or whatever location you prefer):
+
+$ tar zxvf apache-maven-3.0.4-bin.tar.gz
+$ export PATH=/usr/local/apache-maven-3.0.4/bin:$PATH
+Maven also needs to know where Java is, and expects the JAVA_HOME environment variable to be set:
+
+$ export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.55.x86_64
+Verify that Maven is installed correctly:
+
+$ mvn --version
+You probably want to ensure that your environment variables will survive a logout/reboot. Be sure to update ~/.bashrc with the PATH and JAVA_HOME variables.
+
+Building RPMs for CloudStack is fairly simple. Assuming you already have the source downloaded and have uncompressed the tarball into a local directory, you’re going to be able to generate packages in just a few minutes.
+
+Note
+
+Packaging has Changed. If you’ve created packages for CloudStack previously, you should be aware that the process has changed considerably since the project has moved to using Apache Maven. Please be sure to follow the steps in this section closely.
+Generating RPMS
+Now that we have the prerequisites and source, you will cd to the packaging/centos63/ directory.
+
+$ cd packaging/centos63
+Generating RPMs is done using the package.sh script:
+
+$ ./package.sh
+That will run for a bit and then place the finished packages in dist/rpmbuild/RPMS/x86_64/.
+
+You should see the following RPMs in that directory:
+
+cloudstack-agent-4.4.1.el6.x86_64.rpm
+cloudstack-awsapi-4.4.1.el6.x86_64.rpm
+cloudstack-cli-4.4.1.el6.x86_64.rpm
+cloudstack-common-4.4.1.el6.x86_64.rpm
+cloudstack-docs-4.4.1.el6.x86_64.rpm
+cloudstack-management-4.4.1.el6.x86_64.rpm
+cloudstack-usage-4.4.1.el6.x86_64.rpm
+Creating a yum repo
+While RPMs is a useful packaging format - it’s most easily consumed from Yum repositories over a network. The next step is to create a Yum Repo with the finished packages:
+
+$ mkdir -p ~/tmp/repo
+$ cp dist/rpmbuild/RPMS/x86_64/*rpm ~/tmp/repo/
+$ createrepo ~/tmp/repo
+The files and directories within ~/tmp/repo can now be uploaded to a web server and serve as a yum repository.
+
+Configuring your systems to use your new yum repository
+Now that your yum repository is populated with RPMs and metadata we need to configure the machines that need to install CloudStack. Create a file named /etc/yum.repos.d/cloudstack.repo with this information:
+
+[apache-cloudstack]
+name=Apache CloudStack
+baseurl=http://webserver.tld/path/to/repo
+enabled=1
+gpgcheck=0
+Completing this step will allow you to easily install CloudStack on a number of machines across the network.
