@@ -1,6 +1,20 @@
 CloudstackOnEC2
 ===============
-1、Create instance on EC2
-2、yum -y update
-3、http://pip.readthedocs.org/en/latest/installing.html
+1、创建AMI虚拟机，使用Putty连接
+2、更新EC2
+   yum -y update
+3、安装pip
+   http://pip.readthedocs.org/en/latest/installing.html
    sudo yum install python-pip
+4、安装Cloudmonkey
+   http://cloudstack.apache.org/downloads.html
+   pip install cloudmonkey
+   
+   To upgrade:
+   $ pip install --upgrade cloudmonkey
+   Though a clean upgrade is recommended:
+   $ pip uninstall cloudmonkey
+   $ pip install cloudmonkey
+
+5、参照CentOS上的快速安装文档安装
+   http://docs.cloudstack.apache.org/projects/cloudstack-installation/en/latest/qig.html
