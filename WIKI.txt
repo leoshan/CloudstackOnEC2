@@ -1,5 +1,6 @@
 CloudstackOnEC2
 ===============
+一、快速安装
 1、创建AMI 是CentOS 6.5的虚拟机（很重要，否则依赖关系搞不定），使用Putty连接
 /××××××××可选操作×××××××××××××/
 2、更新EC2
@@ -20,3 +21,10 @@ CloudstackOnEC2
 =======================================
 5、参照CentOS上的快速安装文档安装
    http://docs.cloudstack.apache.org/projects/cloudstack-installation/en/latest/qig.html
+
+二、编译安装
+http://docs.cloudstack.apache.org/projects/cloudstack-installation/en/4.4/installation.html
+http://docs.cloudstack.apache.org/projects/cloudstack-installation/en/4.4/building_from_source.html
+
+
+
