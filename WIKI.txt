@@ -1,0 +1,6 @@
+CloudstackOnEC2
+===============
+1、Create instance on EC2
+2、yum -y update
+3、http://pip.readthedocs.org/en/latest/installing.html
+   sudo yum install python-pip
